@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from app.forms import CursoForm, ChangePasswordForm
-from app.models import db, Curso, User
+from app.models import db, Curso, User, Ticket
 
 # Blueprint principal que maneja el dashboard, gestión de cursos y cambio de contraseña
 main = Blueprint('main', __name__)
@@ -122,3 +122,35 @@ def listar_usuarios():
     usuarios = User.query.join(User.role).all()
 
     return render_template('usuarios.html', usuarios=usuarios)
+
+
+@main.route('/tickets', methods=['GET'])
+def listar_tickets():
+    """
+    Retorna una lista de tickets en formato JSON.
+    """
+    try:
+        # Obtener todos los tickets de la base de datos
+        tickets = Ticket.query.all()
+
+        # Formatear los datos en una lista de diccionarios
+        data = [
+            {
+                'id': ticket.id,
+                'asunto': ticket.asunto,
+                'descripcion': ticket.descripcion,
+                'prioridad': ticket.prioridad,
+                'estado': ticket.estado,
+                'usuario_id': ticket.usuario_id,
+                'tecnico_id': ticket.tecnico_id,
+                'fecha_creacion': ticket.fecha_creacion
+            }
+            for ticket in tickets
+        ]
+
+        # Retorna respuesta
+        return ({'tickets': data}), 200
+
+    except Exception as e:
+        # Manejo de errores
+        return ({'error': str(e)}), 500
