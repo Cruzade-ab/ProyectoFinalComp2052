@@ -163,33 +163,33 @@ def listar_tickets():
         # Manejo de errores
         return ({'error': str(e)}), 500
 
-@main.route('/tickets', methods=['GET'])
-def listar_tickets():
-    """
-    Retorna una lista de tickets en formato JSON.
-    """
-    try:
-        # Obtener todos los tickets de la base de datos
-        tickets = Ticket.query.all()
+# @main.route('/tickets', methods=['GET'])
+# def listar_tickets():
+#     """
+#     Retorna una lista de tickets en formato JSON.
+#     """
+#     try:
+#         # Obtener todos los tickets de la base de datos
+#         tickets = Ticket.query.all()
 
-        # Formatear los datos en una lista de diccionarios
-        data = [
-            {
-                'id': ticket.id,
-                'asunto': ticket.asunto,
-                'descripcion': ticket.descripcion,
-                'prioridad': ticket.prioridad,
-                'estado': ticket.estado,
-                'usuario_id': ticket.usuario_id,
-                'tecnico_id': ticket.tecnico_id,
-                'fecha_creacion': ticket.fecha_creacion
-            }
-            for ticket in tickets
-        ]
+#         # Formatear los datos en una lista de diccionarios
+#         data = [
+#             {
+#                 'id': ticket.id,
+#                 'asunto': ticket.asunto,
+#                 'descripcion': ticket.descripcion,
+#                 'prioridad': ticket.prioridad,
+#                 'estado': ticket.estado,
+#                 'usuario_id': ticket.usuario_id,
+#                 'tecnico_id': ticket.tecnico_id,
+#                 'fecha_creacion': ticket.fecha_creacion
+#             }
+#             for ticket in tickets
+#         ]
 
-        # Retorna respuesta
-        return ({'tickets': data}), 200
+#         # Retorna respuesta
+#         return ({'tickets': data}), 200
 
-    except Exception as e:
-        # Manejo de errores
-        return ({'error': str(e)}), 500
+#     except Exception as e:
+#         # Manejo de errores
+#         return ({'error': str(e)}), 500
