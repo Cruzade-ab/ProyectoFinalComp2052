@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from app.forms import CursoForm, ChangePasswordForm
-from app.models import db, Curso, User, Ticket
+from app.forms import TicketForm, ChangePasswordForm
+from app.models import db, Ticket, User, Ticket
 
-# Blueprint principal que maneja el dashboard, gestión de cursos y cambio de contraseña
+# Blueprint principal que maneja el dashboard, gestión de tickets y cambio de contraseña
 main = Blueprint('main', __name__)
 
 @main.route('/')
@@ -39,76 +39,84 @@ def cambiar_password():
 @login_required
 def dashboard():
     """
-    Panel principal del usuario. Muestra los cursos si no es estudiante.
+    Panel principal del usuario. Muestra los tickets si no es estudiante.
     """
-    if current_user.role.name == 'Student': # Change this for your project
-        cursos = Curso.query.all()
+    if current_user.role.name == 'Usuario': # Change this for your project
+        tickets = Ticket.query.all()
     else:
-        cursos = Curso.query.filter_by(profesor_id=current_user.id).all()
+        tickets = Ticket.query.filter_by(tecnico_id=current_user.id).all()
 
-    return render_template('dashboard.html', cursos=cursos)
+    return render_template('dashboard.html', tickets=tickets)
 
-@main.route('/cursos', methods=['GET', 'POST'])
+@main.route('/tickets', methods=['GET', 'POST'])
 @login_required
-def cursos():
+def tickets():
     """
-    Permite crear un nuevo curso. Solo disponible para profesores o admins.
+    Permite crear un nuevo ticket. Solo disponible para técnico o admins.
     """
-    form = CursoForm()
+    form = TicketForm()
     if form.validate_on_submit():
-        curso = Curso(
-            titulo=form.titulo.data,
+        ticket = Ticket(
+            # titulo=form.titulo.data,
+            # descripcion=form.descripcion.data,
+            # profesor_id=current_user.id
+            asunto=form.asunto.data,
             descripcion=form.descripcion.data,
-            profesor_id=current_user.id
+            prioridad=form.prioridad.data,
+            estado='Abierto',  # Estado inicial por defecto
+            usuario_id=current_user.id,  # Asigna el ticket al usuario actual
+            tecnico_id=None,  # Puede ser asignado después
+            fecha_creacion=db.func.current_timestamp()
+
         )
-        db.session.add(curso)
+        db.session.add(ticket)
         db.session.commit()
-        flash("Course created successfully.")  # 🔁 Traducido
+        flash("Ticket created successfully.")  # 🔁 Traducido
         return redirect(url_for('main.dashboard'))
 
-    return render_template('curso_form.html', form=form)
+    return render_template('ticket_form.html', form=form)
 
-@main.route('/cursos/<int:id>/editar', methods=['GET', 'POST'])
+@main.route('/tickets/<int:id>/editar', methods=['GET', 'POST'])
 @login_required
-def editar_curso(id):
+def editar_ticket(id):
     """
-    Permite editar un curso existente. Solo si es admin o el profesor dueño.
+    Permite editar un ticket existente. Solo si es admin o el técnico.
     """
-    curso = Curso.query.get_or_404(id)
+    ticket = Ticket.query.get_or_404(id)
 
     # Validación de permisos
-    if current_user.role.name not in ['Admin', 'Professor'] or (
-        curso.profesor_id != current_user.id and current_user.role.name != 'Admin'):
-        flash('You do not have permission to edit this course.')  # 🔁 Traducido
+    if current_user.role.name not in ['Admin', 'Técnico'] or (
+        ticket.profesor_id != current_user.id and current_user.role.name != 'Admin'):
+        flash('You do not have permission to edit this ticket.')  # 🔁 Traducido
         return redirect(url_for('main.dashboard'))
 
-    form = CursoForm(obj=curso)
+    form = TicketForm(obj=ticket)
 
     if form.validate_on_submit():
-        curso.titulo = form.titulo.data
-        curso.descripcion = form.descripcion.data
+        ticket.titulo = form.titulo.data
+        ticket.descripcion = form.descripcion.data
         db.session.commit()
-        flash("Course updated successfully.")  # 🔁 Traducido
+        flash("Ticket updated successfully.")  # 🔁 Traducido
         return redirect(url_for('main.dashboard'))
 
-    return render_template('curso_form.html', form=form, editar=True)
+    return render_template('ticket_form.html', form=form, editar=True)
 
-@main.route('/cursos/<int:id>/eliminar', methods=['POST'])
+@main.route('/tickets/<int:id>/eliminar', methods=['POST'])
 @login_required
-def eliminar_curso(id):
+def eliminar_ticket(id):
     """
-    Elimina un curso si el usuario es admin o su profesor creador.
+    Elimina un ticket si el usuario es admin o su profesor creador.
     """
-    curso = Curso.query.get_or_404(id)
+    ticket = Ticket.query.get_or_404(id)
 
-    if current_user.role.name not in ['Admin', 'Professor'] or (
-        curso.profesor_id != current_user.id and current_user.role.name != 'Admin'):
-        flash('You do not have permission to delete this course.')  # 🔁 Traducido
+    if current_user.role.name not in ['Admin', 'Técnico'] or (
+        ticket.profesor_id != current_user.id and current_user.role.name != 'Admin'):
+        flash('You do not have permission to delete this ticket.')  # 🔁 Traducido
         return redirect(url_for('main.dashboard'))
 
-    db.session.delete(curso)
+    db.session.delete(ticket)
     db.session.commit()
-    flash("Course deleted successfully.")  # 🔁 Traducido
+    flash("Ticket deleted successfully.")  # 🔁 Traducido
     return redirect(url_for('main.dashboard'))
 
 @main.route('/usuarios')
@@ -123,6 +131,37 @@ def listar_usuarios():
 
     return render_template('usuarios.html', usuarios=usuarios)
 
+
+@main.route('/tickets', methods=['GET'])
+def listar_tickets():
+    """
+    Retorna una lista de tickets en formato JSON.
+    """
+    try:
+        # Obtener todos los tickets de la base de datos
+        tickets = Ticket.query.all()
+
+        # Formatear los datos en una lista de diccionarios
+        data = [
+            {
+                'id': ticket.id,
+                'asunto': ticket.asunto,
+                'descripcion': ticket.descripcion,
+                'prioridad': ticket.prioridad,
+                'estado': ticket.estado,
+                'usuario_id': ticket.usuario_id,
+                'tecnico_id': ticket.tecnico_id,
+                'fecha_creacion': ticket.fecha_creacion
+            }
+            for ticket in tickets
+        ]
+
+        # Retorna respuesta
+        return ({'tickets': data}), 200
+
+    except Exception as e:
+        # Manejo de errores
+        return ({'error': str(e)}), 500
 
 @main.route('/tickets', methods=['GET'])
 def listar_tickets():
