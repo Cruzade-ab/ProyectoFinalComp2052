@@ -50,3 +50,20 @@ class Curso(db.Model):
     titulo = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
     profesor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+class Ticket(db.Model):
+    __tablename__ = 'ticket'
+
+    id = db.Column(db.Integer, primary_key=True)
+    asunto = db.Column(db.String(255), nullable=False)
+    descripcion = db.Column(db.Text, nullable=False)
+    prioridad = db.Column(db.Enum('Baja', 'Media', 'Alta'), nullable=False)
+    estado = db.Column(db.Enum('Abierto', 'En Progreso', 'Resuelto', 'Cerrado'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    tecnico_id = db.Column(db.Integer, db.ForeignKey('user.id'))  
+    fecha_creacion = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+    
+    usuario = db.relationship('User', foreign_keys=[usuario_id])
+    tecnico = db.relationship('User', foreign_keys=[tecnico_id])
+
