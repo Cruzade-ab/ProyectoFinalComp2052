@@ -17,6 +17,19 @@ class Role(db.Model):
     # Relación inversa opcional (para ver usuarios asociados al rol)
     users = db.relationship('User', backref='role', lazy=True)
 
+
+class Ticket(db.Model):
+    __tablename__ = 'ticket'
+
+    id = db.Column(db.Integer, primary_key=True)
+    asunto = db.Column(db.String(255), nullable=False)
+    descripcion = db.Column(db.Text, nullable=False)
+    prioridad = db.Column(db.Enum('Baja', 'Media', 'Alta'), nullable=False)
+    estado = db.Column(db.Enum('Abierto', 'En Progreso', 'Resuelto', 'Cerrado'), nullable=False)
+    fecha_creacion = db.Column(db.DateTime, default=db.func.current_timestamp())
+    tecnico_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
 # Modelo de usuarios del sistema
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
@@ -27,9 +40,11 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)  # Asegura suficiente espacio para el hash
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
 
-    # Relación con tickets (si es Técnico)
-    tickets = db.relationship('Ticket', backref='tecnico', lazy=True)
-   
+    #Relación de usuario 
+    tickets_creados = db.relationship('Ticket', foreign_keys=[Ticket.usuario_id], backref='usuario', lazy=True)
+
+    # Relación con los tickets asignados al usuario (como técnico)
+    tickets_asignados = db.relationship('Ticket', foreign_keys=[Ticket.tecnico_id], backref='tecnico', lazy=True)
 
     def set_password(self, password: str):
         """
@@ -43,15 +58,7 @@ class User(UserMixin, db.Model):
         """
         return check_password_hash(self.password_hash, password)
 
-class Ticket(db.Model):
-    __tablename__ = 'ticket'
 
-    id = db.Column(db.Integer, primary_key=True)
-    asunto = db.Column(db.String(255), nullable=False)
-    descripcion = db.Column(db.Text, nullable=False)
-    prioridad = db.Column(db.Enum('Baja', 'Media', 'Alta'), nullable=False)
-    estado = db.Column(db.Enum('Abierto', 'En Progreso', 'Resuelto', 'Cerrado'), nullable=False)
-    fecha_creacion = db.Column(db.DateTime, default=db.func.current_timestamp())
-    tecnico_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
 
 

@@ -42,11 +42,11 @@ def dashboard():
     """
     Panel principal del usuario. Muestra los tickets si no es estudiante.
     """
-    if current_user.role.name == 'Usuario': # Change this for your project
+    if current_user.role.name == 'Admin': 
         tickets = Ticket.query.all()
     else:
-        tickets = Ticket.query.filter_by(tecnico_id=current_user.id).all()
-
+        tickets = Ticket.query.filter_by(usuario_id=current_user.id).all()
+    
     return render_template('dashboard.html', tickets=tickets)
 
 @main.route('/tickets', methods=['GET', 'POST'])
