@@ -23,6 +23,7 @@ content %}
       <th>Estado</th>
       <th>Fecha Creación</th>
       <th>Técnico Asignado</th>
+      <th>Usuario Asignado</th>
       <th class="text-center">Actions</th>
     </tr>
   </thead>
@@ -35,6 +36,7 @@ content %}
       <td>{{ ticket.estado }}</td>
       <td>{{ ticket.fecha_creacion }}</td>
       <td>{{ ticket.tecnico.username }}</td>
+      <td>{{ ticket.usuario.username }}</td>
       <td class="text-center ps-0 pe-0">
         {% if current_user.role.name == 'Admin' or ticket.tecnico_id ==
         current_user.id %}

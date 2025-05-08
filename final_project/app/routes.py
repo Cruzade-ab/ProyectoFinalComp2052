@@ -44,6 +44,8 @@ def dashboard():
     """
     if current_user.role.name == 'Admin': 
         tickets = Ticket.query.all()
+    elif current_user.role.name == 'Técnico':
+        tickets = Ticket.query.filter_by(tecnico_id=current_user.id).all()
     else:
         tickets = Ticket.query.filter_by(usuario_id=current_user.id).all()
     
@@ -89,10 +91,14 @@ def editar_ticket(id):
         return redirect(url_for('main.dashboard'))
 
     form = TicketsForm(obj=ticket)
-
+    usuarios = User.query.filter(User.role_id == 2).all()
+    form.usuario_id.choices = [(u.id, u.username) for u in usuarios]
     if form.validate_on_submit():
-        ticket.titulo = form.titulo.data
+        asunto=form.asunto.data,
         ticket.descripcion = form.descripcion.data
+        ticket.prioridad = form.prioridad.data
+        ticket.estado = form.estado.data
+        ticket.usuario_id = form.usuario_id.data
         db.session.commit()
         flash("Ticket updated successfully.")  # 🔁 Traducido
         return redirect(url_for('main.dashboard'))
