@@ -15,6 +15,11 @@ def login():
     form = LoginForm()
 
     # Procesamiento del formulario si es enviado correctamente
+    # print("🔍 Método:", request.method)
+    print("📩 Formulario enviado:", form.is_submitted())
+    print("✅ Datos válidos:", form.validate())
+    print("❌ Errores del formulario:", form.errors)
+
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         print(f"Form submitted with email: {form.email.data}")
