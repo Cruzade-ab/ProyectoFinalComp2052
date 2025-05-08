@@ -56,12 +56,15 @@ def tickets():
     Permite crear un nuevo ticket. Solo disponible para tecnico o admins.
     """
     form = TicketsForm()
+    usuarios = User.query.filter(User.role_id == 2).all()
+    form.usuario_id.choices = [(u.id, u.username) for u in usuarios]
     if form.validate_on_submit():
         ticket = Ticket(
             asunto=form.asunto.data,
             descripcion=form.descripcion.data,
             prioridad=form.prioridad.data,
             estado=form.estado.data,
+            usuario_id=form.usuario_id.data,
             tecnico_id=current_user.id
         )
         db.session.add(ticket)

@@ -44,5 +44,11 @@ class TicketsForm(FlaskForm):
         choices=[('Abierto', 'Abierto'), ('En proceso', 'En proceso'), ('Cerrado', 'Cerrado')],
         validators=[DataRequired()]
     )
+    usuario_id = SelectField(
+        'Asignar Usuario',
+        choices=[], 
+        coerce=int,
+        validators=[DataRequired()]
+    )
 
     submit = SubmitField('Save')
