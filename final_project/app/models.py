@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Modelo de roles (Admin, Professor, Student, etc.)
+# Modelo de roles (Admin, Técnico, User, etc.)
 class Role(db.Model):
     __tablename__ = 'role'
     
@@ -27,8 +27,9 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)  # Asegura suficiente espacio para el hash
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
 
-    # Relación con tickets (si es profesor)
+    # Relación con tickets (si es Técnico)
     tickets = db.relationship('Ticket', backref='tecnico', lazy=True)
+   
 
     def set_password(self, password: str):
         """
@@ -42,15 +43,6 @@ class User(UserMixin, db.Model):
         """
         return check_password_hash(self.password_hash, password)
 
-# Modelo de ticket asociado a un profesor
-# class Ticket(db.Model):
-#     __tablename__ = 'ticket'
-
-#     id = db.Column(db.Integer, primary_key=True)
-#     titulo = db.Column(db.String(100), nullable=False)
-#     descripcion = db.Column(db.Text, nullable=False)
-#     profesor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    
 class Ticket(db.Model):
     __tablename__ = 'ticket'
 
@@ -59,11 +51,7 @@ class Ticket(db.Model):
     descripcion = db.Column(db.Text, nullable=False)
     prioridad = db.Column(db.Enum('Baja', 'Media', 'Alta'), nullable=False)
     estado = db.Column(db.Enum('Abierto', 'En Progreso', 'Resuelto', 'Cerrado'), nullable=False)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    tecnico_id = db.Column(db.Integer, db.ForeignKey('user.id'))  
     fecha_creacion = db.Column(db.DateTime, default=db.func.current_timestamp())
+    tecnico_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    
-    usuario = db.relationship('User', foreign_keys=[usuario_id])
-    tecnico = db.relationship('User', foreign_keys=[tecnico_id])
 

@@ -47,12 +47,14 @@ def register():
             role=role
         )
         user.set_password(form.password.data)
+        print(f"user {user}")
 
         # Guarda en la base de datos
         db.session.add(user)
         db.session.commit()
 
         # Muestra mensaje de éxito
+        print('User registered successfully.')
         flash('User registered successfully.')
         return redirect(url_for('auth.login'))
     

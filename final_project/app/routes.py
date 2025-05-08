@@ -55,7 +55,7 @@ def tickets():
     """
     Permite crear un nuevo ticket. Solo disponible para tecnico o admins.
     """
-    form = TicketForm()
+    form = TicketsForm()
     if form.validate_on_submit():
         ticket = Ticket(
             titulo=form.titulo.data,
@@ -83,7 +83,7 @@ def editar_ticket(id):
         flash('You do not have permission to edit this course.')  # 🔁 Traducido
         return redirect(url_for('main.dashboard'))
 
-    form = TicketForm(obj=ticket)
+    form = TicketsForm(obj=ticket)
 
     if form.validate_on_submit():
         ticket.titulo = form.titulo.data
