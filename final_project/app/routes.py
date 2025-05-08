@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from app.forms import TicketForm, ChangePasswordForm
+from app.forms import TicketsForm, ChangePasswordForm
+# from app.forms import TicketForm, ChangePasswordForm
 from app.models import db, Ticket, User, Ticket
 
 # Blueprint principal que maneja el dashboard, gestión de tickets y cambio de contraseña
@@ -52,22 +53,14 @@ def dashboard():
 @login_required
 def tickets():
     """
-    Permite crear un nuevo ticket. Solo disponible para técnico o admins.
+    Permite crear un nuevo ticket. Solo disponible para tecnico o admins.
     """
-    form = TicketForm()
+    form = TicketsForm()
     if form.validate_on_submit():
         ticket = Ticket(
-            # titulo=form.titulo.data,
-            # descripcion=form.descripcion.data,
-            # profesor_id=current_user.id
-            asunto=form.asunto.data,
+            titulo=form.titulo.data,
             descripcion=form.descripcion.data,
-            prioridad=form.prioridad.data,
-            estado='Abierto',  # Estado inicial por defecto
-            usuario_id=current_user.id,  # Asigna el ticket al usuario actual
-            tecnico_id=None,  # Puede ser asignado después
-            fecha_creacion=db.func.current_timestamp()
-
+            tecnico_id=current_user.id
         )
         db.session.add(ticket)
         db.session.commit()
@@ -80,17 +73,17 @@ def tickets():
 @login_required
 def editar_ticket(id):
     """
-    Permite editar un ticket existente. Solo si es admin o el técnico.
+    Permite editar un ticket existente. Solo si es admin o el tecnico dueño.
     """
     ticket = Ticket.query.get_or_404(id)
 
     # Validación de permisos
     if current_user.role.name not in ['Admin', 'Técnico'] or (
-        ticket.profesor_id != current_user.id and current_user.role.name != 'Admin'):
-        flash('You do not have permission to edit this ticket.')  # 🔁 Traducido
+        ticket.tecnico_id != current_user.id and current_user.role.name != 'Admin'):
+        flash('You do not have permission to edit this course.')  # 🔁 Traducido
         return redirect(url_for('main.dashboard'))
 
-    form = TicketForm(obj=ticket)
+    form = TicketsForm(obj=ticket)
 
     if form.validate_on_submit():
         ticket.titulo = form.titulo.data
@@ -105,13 +98,13 @@ def editar_ticket(id):
 @login_required
 def eliminar_ticket(id):
     """
-    Elimina un ticket si el usuario es admin o su profesor creador.
+    Elimina un ticket si el usuario es admin o su tecnico creador.
     """
     ticket = Ticket.query.get_or_404(id)
 
     if current_user.role.name not in ['Admin', 'Técnico'] or (
-        ticket.profesor_id != current_user.id and current_user.role.name != 'Admin'):
-        flash('You do not have permission to delete this ticket.')  # 🔁 Traducido
+        ticket.tecnico_id != current_user.id and current_user.role.name != 'Admin'):
+        flash('You do not have permission to delete this course.')  # 🔁 Traducido
         return redirect(url_for('main.dashboard'))
 
     db.session.delete(ticket)
