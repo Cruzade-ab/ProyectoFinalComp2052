@@ -43,13 +43,13 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
 # Modelo de ticket asociado a un profesor
-class Ticket(db.Model):
-    __tablename__ = 'ticket'
+# class Ticket(db.Model):
+#     __tablename__ = 'ticket'
 
-    id = db.Column(db.Integer, primary_key=True)
-    titulo = db.Column(db.String(100), nullable=False)
-    descripcion = db.Column(db.Text, nullable=False)
-    profesor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+#     id = db.Column(db.Integer, primary_key=True)
+#     titulo = db.Column(db.String(100), nullable=False)
+#     descripcion = db.Column(db.Text, nullable=False)
+#     profesor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
 class Ticket(db.Model):
     __tablename__ = 'ticket'
