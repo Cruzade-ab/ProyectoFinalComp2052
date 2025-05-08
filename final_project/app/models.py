@@ -25,7 +25,7 @@ class Ticket(db.Model):
     asunto = db.Column(db.String(255), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
     prioridad = db.Column(db.Enum('Baja', 'Media', 'Alta'), nullable=False)
-    estado = db.Column(db.Enum('Abierto', 'En Progreso', 'Resuelto', 'Cerrado'), nullable=False)
+    estado = db.Column(db.Enum('Abierto', 'En proceso', 'Cerrado'), nullable=False)
     fecha_creacion = db.Column(db.DateTime, default=db.func.current_timestamp())
     tecnico_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

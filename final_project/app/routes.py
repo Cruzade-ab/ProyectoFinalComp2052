@@ -58,13 +58,15 @@ def tickets():
     form = TicketsForm()
     if form.validate_on_submit():
         ticket = Ticket(
-            titulo=form.titulo.data,
+            asunto=form.asunto.data,
             descripcion=form.descripcion.data,
+            prioridad=form.prioridad.data,
+            estado=form.estado.data,
             tecnico_id=current_user.id
         )
         db.session.add(ticket)
         db.session.commit()
-        flash("Ticket created successfully.")  # 🔁 Traducido
+        flash("Ticket creado exitosamente.")
         return redirect(url_for('main.dashboard'))
 
     return render_template('ticket_form.html', form=form)
