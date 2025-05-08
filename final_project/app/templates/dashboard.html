@@ -7,7 +7,7 @@ content %}
   <div class="col text-end">
     <!-- Change the next line for your project -->
     {% if current_user.role.name != 'Student' %}
-    <a class="btn btn-primary mb-3 me-2" href="{{ url_for('main.cursos') }}">
+    <a class="btn btn-primary mb-3 me-2" href="{{ url_for('main.tickets') }}">
       <i class="bi bi-plus"></i> New
     </a>
     {% endif %}

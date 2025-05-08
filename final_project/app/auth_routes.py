@@ -8,6 +8,7 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    print("Hola mundo")
     """
     Inicia sesión de un usuario existente si las credenciales son válidas.
     """
@@ -16,7 +17,8 @@ def login():
     # Procesamiento del formulario si es enviado correctamente
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-
+        print(f"Form submitted with email: {form.email.data}")
+        
         # Verifica si el usuario existe y la contraseña es válida
         if user and user.check_password(form.password.data):
             login_user(user)
@@ -26,12 +28,13 @@ def login():
         flash('Invalid credentials')  # 🔁 Traducido
 
     # Renderiza el formulario de login
+    print("Renderizando log in")
     return render_template('login.html', form=form)
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     """
-    Registra un nuevo usuario y lo asocia por defecto al rol "Student".
+    Registra un nuevo usuario y lo asocia por defecto al rol "User".
     """    
     form = RegisterForm()
     
