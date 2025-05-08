@@ -41,7 +41,7 @@ def dashboard():
     """
     Panel principal del usuario. Muestra los cursos si no es estudiante.
     """
-    if current_user.role.name == 'Student': # Change this for your project
+    if current_user.role.name == 'Usuario': # Change this for your project
         cursos = Curso.query.all()
     else:
         cursos = Curso.query.filter_by(profesor_id=current_user.id).all()
@@ -77,7 +77,7 @@ def editar_curso(id):
     curso = Curso.query.get_or_404(id)
 
     # Validación de permisos
-    if current_user.role.name not in ['Admin', 'Professor'] or (
+    if current_user.role.name not in ['Admin', 'Tecnico'] or (
         curso.profesor_id != current_user.id and current_user.role.name != 'Admin'):
         flash('You do not have permission to edit this course.')  # 🔁 Traducido
         return redirect(url_for('main.dashboard'))
@@ -101,7 +101,7 @@ def eliminar_curso(id):
     """
     curso = Curso.query.get_or_404(id)
 
-    if current_user.role.name not in ['Admin', 'Professor'] or (
+    if current_user.role.name not in ['Admin', 'Tecnico'] or (
         curso.profesor_id != current_user.id and current_user.role.name != 'Admin'):
         flash('You do not have permission to delete this course.')  # 🔁 Traducido
         return redirect(url_for('main.dashboard'))
