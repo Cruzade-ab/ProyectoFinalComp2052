@@ -8,6 +8,7 @@ content %}
       <th>Username</th>
       <th>Email</th>
       <th>Role</th>
+      <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
@@ -16,6 +17,27 @@ content %}
       <td>{{ usuario.username }}</td>
       <td>{{ usuario.email }}</td>
       <td>{{ usuario.role.name }}</td>
+      <td class="text-center ps-0 pe-0">
+        {% if current_user.role.name == 'Admin' and usuario.id != current_user.id %}
+
+
+        <a href="{{ url_for('main.editar_usuario', id=usuario.id) }}" class="btn btn-sm btn-warning" title="Editar usuario">
+        <i class="bi bi-pencil"></i>
+        </a>
+        <form method="POST"
+              action="{{ url_for('main.eliminar_usuario', id=usuario.id) }}"
+              style="display:inline"
+              onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
+          <button type="submit" class="btn btn-sm btn-danger" title="Eliminar usuario">
+            <i class="bi bi-trash"></i>
+          </button>
+        </form>
+        {% else %}
+        <span class="text-muted" title="No puedes editarte a ti como usuario">
+          <i class="bi bi-lock"></i>
+        </span>
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
   </tbody>
