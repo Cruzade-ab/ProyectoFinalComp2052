@@ -1,11 +1,14 @@
-### Editar un curso (POST)
+### Editar un ticket (POST)
 
-# Simular POST con nuevos datos del curso
+# Simular POST con nuevos datos del ticket
 
-PUT http://localhost:5000/cursos/4
+PUT http://localhost:5000/tickets/7
 Content-Type: application/json
 
 {
-  "titulo": "Curso actualizado",
-  "descripcion": "Nueva descripción actualizada"
+  "asunto": "Error corregido en servidor",
+  "descripcion": "El sistema fue actualizado y ahora funciona correctamente",
+  "prioridad": "Media",
+  "estado": "En proceso"
 }
+
