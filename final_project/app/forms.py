@@ -53,3 +53,15 @@ class TicketsForm(FlaskForm):
     )
 
     submit = SubmitField('Save')
+    
+    
+
+class UserEditForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    role = SelectField(
+        'Role',
+        choices=[('Usuario', 'Usuario'), ('Técnico', 'Técnico'), ('Admin', 'Admin')],
+        validators=[DataRequired()]
+    )
+    submit = SubmitField('Guardar cambios')

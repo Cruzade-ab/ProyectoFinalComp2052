@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user, login_user
-from app.forms import TicketsForm, ChangePasswordForm, LoginForm
-from app.models import db, Ticket, User, Ticket
+from app.forms import TicketsForm, ChangePasswordForm, LoginForm, UserEditForm
+from app.models import db, Ticket, User, Ticket, Role
 
 # Blueprint principal que maneja el dashboard, gestión de tickets y cambio de contraseña
 main = Blueprint('main', __name__)
@@ -134,6 +134,46 @@ def listar_usuarios():
     usuarios = User.query.join(User.role).all()
 
     return render_template('usuarios.html', usuarios=usuarios)
+
+@main.route('/usuarios/<int:id>/editar', methods=['GET', 'POST'])
+@login_required
+def editar_usuario(id):
+    if current_user.role.name != 'Admin':
+        flash("No tienes permiso para editar usuarios.")
+        return redirect(url_for('main.dashboard'))
+
+    usuario = User.query.get_or_404(id)
+    form = UserEditForm(obj=usuario)
+
+    # choices: (id, nombre)
+    form.role.choices = [(r.id, r.name) for r in Role.query.all()]
+
+    if form.validate_on_submit():
+        usuario.username = form.username.data
+        usuario.email = form.email.data
+        usuario.role_id = form.role.data  # ahora es un int
+        db.session.commit()
+        flash("Usuario actualizado correctamente.")
+        return redirect(url_for('main.listar_usuarios'))
+
+    # Establecer el valor actual del select
+    form.role.data = usuario.role_id
+
+    return render_template('usuario_form.html', form=form, editar=True)
+
+
+@main.route('/usuarios/<int:id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_usuario(id):
+    if current_user.role.name != 'Admin':
+        flash("No tienes permiso para eliminar usuarios.")
+        return redirect(url_for('main.dashboard'))
+
+    usuario = User.query.get_or_404(id)
+    db.session.delete(usuario)
+    db.session.commit()
+    flash("Usuario eliminado correctamente.")
+    return redirect(url_for('main.listar_usuarios'))
 
 
 @main.route('/tickets', methods=['GET'])
