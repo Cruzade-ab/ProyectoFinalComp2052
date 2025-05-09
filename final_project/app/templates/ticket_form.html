@@ -28,6 +28,14 @@
     {{ form.estado(class="form-select") }}
   </div>
 
+  <!-- Asignar Tecnico -->
+  {% if current_user.role.name == 'Admin' %}
+  <div class="mb-3">
+    {{ form.tecnico_id.label(class="form-label") }}
+    {{ form.tecnico_id(class="form-select") }}
+  </div>
+  {% endif %}
+
   <!-- Usuarios -->
   <div class="mb-3">
     {{ form.usuario_id.label(class="form-label") }}

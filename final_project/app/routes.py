@@ -51,15 +51,23 @@ def dashboard():
     
     return render_template('dashboard.html', tickets=tickets)
 
+
 @main.route('/tickets', methods=['GET', 'POST'])
 @login_required
 def tickets():
-    """
-    Permite crear un nuevo ticket. Solo disponible para tecnico o admins.
-    """
     form = TicketsForm()
+
     usuarios = User.query.filter(User.role_id == 2).all()
     form.usuario_id.choices = [(u.id, u.username) for u in usuarios]
+
+    # Solo los admins pueden seleccionar técnico
+    if current_user.role.name == 'Admin':
+        tecnicos = User.query.filter(User.role_id == 3).all()
+        form.tecnico_id.choices = [(t.id, t.username) for t in tecnicos]
+    else:
+        # Ocultamos el select y asignamos automáticamente el técnico actual
+        form.tecnico_id.choices = [(current_user.id, current_user.username)]
+
     if form.validate_on_submit():
         ticket = Ticket(
             asunto=form.asunto.data,
@@ -67,7 +75,7 @@ def tickets():
             prioridad=form.prioridad.data,
             estado=form.estado.data,
             usuario_id=form.usuario_id.data,
-            tecnico_id=current_user.id
+            tecnico_id=form.tecnico_id.data  # Funciona igual en ambos casos
         )
         db.session.add(ticket)
         db.session.commit()
@@ -80,30 +88,46 @@ def tickets():
 @login_required
 def editar_ticket(id):
     """
-    Permite editar un ticket existente. Solo si es admin o el tecnico dueño.
+    Permite editar un ticket existente. Solo si es admin o el técnico dueño.
     """
     ticket = Ticket.query.get_or_404(id)
 
     # Validación de permisos
     if current_user.role.name not in ['Admin', 'Técnico'] or (
         ticket.tecnico_id != current_user.id and current_user.role.name != 'Admin'):
-        flash('You do not have permission to edit this course.')  # 🔁 Traducido
+        flash('No tienes permiso para editar este ticket.')
         return redirect(url_for('main.dashboard'))
 
     form = TicketsForm(obj=ticket)
+
+    # Cargar usuarios
     usuarios = User.query.filter(User.role_id == 2).all()
     form.usuario_id.choices = [(u.id, u.username) for u in usuarios]
+
+    # Cargar técnicos
+    if current_user.role.name == 'Admin':
+        tecnicos = User.query.filter(User.role_id == 3).all()
+        form.tecnico_id.choices = [(t.id, t.username) for t in tecnicos]
+    else:
+        form.tecnico_id.choices = [(ticket.tecnico.id, ticket.tecnico.username)]
+
     if form.validate_on_submit():
-        asunto=form.asunto.data,
+        ticket.asunto = form.asunto.data
         ticket.descripcion = form.descripcion.data
         ticket.prioridad = form.prioridad.data
         ticket.estado = form.estado.data
         ticket.usuario_id = form.usuario_id.data
+
+        # Solo admins pueden cambiar el técnico
+        if current_user.role.name == 'Admin':
+            ticket.tecnico_id = form.tecnico_id.data
+
         db.session.commit()
-        flash("Ticket updated successfully.")  # 🔁 Traducido
+        flash("Ticket actualizado correctamente.")
         return redirect(url_for('main.dashboard'))
 
     return render_template('ticket_form.html', form=form, editar=True)
+
 
 @main.route('/tickets/<int:id>/eliminar', methods=['POST'])
 @login_required

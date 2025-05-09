@@ -51,6 +51,14 @@ class TicketsForm(FlaskForm):
         coerce=int,
         validators=[DataRequired()]
     )
+    
+    tecnico_id = SelectField(
+    'Asignar Técnico',
+    choices=[],
+    coerce=int,
+    validators=[DataRequired()]
+)
+
 
     submit = SubmitField('Save')
     
