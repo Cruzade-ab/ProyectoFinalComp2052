@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flask_login import login_required, current_user
-from app.forms import TicketsForm, ChangePasswordForm
-# from app.forms import TicketForm, ChangePasswordForm
+from flask_login import login_required, current_user, login_user
+from app.forms import TicketsForm, ChangePasswordForm, LoginForm
 from app.models import db, Ticket, User, Ticket
 
 # Blueprint principal que maneja el dashboard, gestión de tickets y cambio de contraseña
@@ -25,16 +24,17 @@ def cambiar_password():
     if form.validate_on_submit():
         # Verifica que la contraseña actual sea correcta
         if not current_user.check_password(form.old_password.data):
-            flash('Current password is incorrect.')  # 🔁 Traducido
+            flash('Current password is incorrect.', "danger")  # 🔁 Traducido
             return render_template('cambiar_password.html', form=form)
 
         # Actualiza la contraseña y guarda
         current_user.set_password(form.new_password.data)
         db.session.commit()
-        flash('✅ Password updated successfully.')  # 🔁 Traducido
+        flash('✅ Password updated successfully.', "success")  # 🔁 Traducido
         return redirect(url_for('main.dashboard'))
 
     return render_template('cambiar_password.html', form=form)
+
 
 @main.route('/dashboard')
 @login_required
@@ -167,33 +167,15 @@ def listar_tickets():
         # Manejo de errores
         return ({'error': str(e)}), 500
 
-# @main.route('/tickets', methods=['GET'])
-# def listar_tickets():
-#     """
-#     Retorna una lista de tickets en formato JSON.
-#     """
-#     try:
-#         # Obtener todos los tickets de la base de datos
-#         tickets = Ticket.query.all()
-
-#         # Formatear los datos en una lista de diccionarios
-#         data = [
-#             {
-#                 'id': ticket.id,
-#                 'asunto': ticket.asunto,
-#                 'descripcion': ticket.descripcion,
-#                 'prioridad': ticket.prioridad,
-#                 'estado': ticket.estado,
-#                 'usuario_id': ticket.usuario_id,
-#                 'tecnico_id': ticket.tecnico_id,
-#                 'fecha_creacion': ticket.fecha_creacion
-#             }
-#             for ticket in tickets
-#         ]
-
-#         # Retorna respuesta
-#         return ({'tickets': data}), 200
-
-#     except Exception as e:
-#         # Manejo de errores
-#         return ({'error': str(e)}), 500
+#Ruta de login
+@main.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and user.check_password(form.password.data):  # Verifica el password brindado
+            login_user(user)
+            return redirect(url_for("main.dashboard"))  
+        else:
+            flash("Email o contraseña incorrectos.", "danger")  # Mensaje de error
+    return render_template("login.html", form=form)
