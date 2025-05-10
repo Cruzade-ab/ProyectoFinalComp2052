@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash
 from app.forms import LoginForm, RegisterForm
 from app.models import db, User, Role
 from flask_login import login_user, logout_user
+from flask import current_app
 
 # Blueprint de autenticación: gestiona login, registro y logout
 auth = Blueprint('auth', __name__)
@@ -14,27 +15,22 @@ def login():
     """
     form = LoginForm()
 
-    # Procesamiento del formulario si es enviado correctamente
-    # print("🔍 Método:", request.method)
-    print("📩 Formulario enviado:", form.is_submitted())
-    print("✅ Datos válidos:", form.validate())
-    print("❌ Errores del formulario:", form.errors)
+    if form.is_submitted():  #verifica si el formulario fue enviado
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data).first()
+            print(f"Form submitted with email: {form.email.data}")
+            
+            if user and user.check_password(form.password.data):
+                login_user(user)
+                return redirect(url_for('main.dashboard'))
+            
+            flash('Email o contraseña incorrectos.', 'danger')
+        else:
+            flash('Formulario inválido. Verifica tus datos.', 'danger')
 
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        print(f"Form submitted with email: {form.email.data}")
-        
-        # Verifica si el usuario existe y la contraseña es válida
-        if user and user.check_password(form.password.data):
-            login_user(user)
-            return redirect(url_for('main.dashboard'))
-
-        # Mensaje si las credenciales no son válidas
-        flash('Invalid credentials')  # 🔁 Traducido
-
-    # Renderiza el formulario de login
     print("Renderizando log in")
     return render_template('login.html', form=form)
+
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():

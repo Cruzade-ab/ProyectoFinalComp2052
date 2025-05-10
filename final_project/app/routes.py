@@ -207,15 +207,3 @@ def listar_tickets():
         # Manejo de errores
         return ({'error': str(e)}), 500
 
-#Ruta de login
-@main.route('/login', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user and user.check_password(form.password.data):  # Verifica el password brindado
-            login_user(user)
-            return redirect(url_for("main.dashboard"))  
-        else:
-            flash("Email o contraseña incorrectos.", "danger")  # Mensaje de error
-    return render_template("login.html", form=form)
