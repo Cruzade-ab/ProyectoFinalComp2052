@@ -23,7 +23,9 @@ content %}
       <th>Estado</th>
       <th>Fecha Creación</th>
       <th>Técnico Asignado</th>
+       {% if current_user.role.name != 'Usuario' %}
       <th>Usuario Asignado</th>
+      {% endif %}
       <th class="text-center">Actions</th>
     </tr>
   </thead>
@@ -36,7 +38,9 @@ content %}
       <td>{{ ticket.estado }}</td>
       <td>{{ ticket.fecha_creacion }}</td>
       <td>{{ ticket.tecnico.username }}</td>
+      {% if current_user.role.name != 'Usuario' %}
       <td>{{ ticket.usuario.username }}</td>
+      {% endif %}
       <td class="text-center ps-0 pe-0">
         {% if current_user.role.name == 'Admin' or ticket.tecnico_id ==
         current_user.id %}
