@@ -56,7 +56,7 @@ class TicketsForm(FlaskForm):
     'Asignar Técnico',
     choices=[],
     coerce=int,
-    validators=[DataRequired()]
+    
 )
 
 

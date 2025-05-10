@@ -51,7 +51,7 @@ def dashboard():
     
     return render_template('dashboard.html', tickets=tickets)
 
-
+#Tickets route
 @main.route('/tickets', methods=['GET', 'POST'])
 @login_required
 def tickets():
@@ -60,13 +60,13 @@ def tickets():
     usuarios = User.query.filter(User.role_id == 2).all()
     form.usuario_id.choices = [(u.id, u.username) for u in usuarios]
 
-    # Solo los admins pueden seleccionar técnico
     if current_user.role.name == 'Admin':
         tecnicos = User.query.filter(User.role_id == 3).all()
         form.tecnico_id.choices = [(t.id, t.username) for t in tecnicos]
     else:
-        # Ocultamos el select y asignamos automáticamente el técnico actual
+        # Si es técnico, su ID se asigna automáticamente 
         form.tecnico_id.choices = [(current_user.id, current_user.username)]
+        form.tecnico_id.data = current_user.id  
 
     if form.validate_on_submit():
         ticket = Ticket(
@@ -75,14 +75,21 @@ def tickets():
             prioridad=form.prioridad.data,
             estado=form.estado.data,
             usuario_id=form.usuario_id.data,
-            tecnico_id=form.tecnico_id.data  # Funciona igual en ambos casos
+            tecnico_id=form.tecnico_id.data
         )
+
         db.session.add(ticket)
         db.session.commit()
-        flash("Ticket creado exitosamente.")
+
+        flash("Ticket creado exitosamente.", "success")
         return redirect(url_for('main.dashboard'))
+    else:
+
+        flash("Error en el formulario. Verifica los datos.", "danger")
 
     return render_template('ticket_form.html', form=form)
+
+
 
 @main.route('/tickets/<int:id>/editar', methods=['GET', 'POST'])
 @login_required
