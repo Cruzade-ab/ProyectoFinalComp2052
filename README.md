@@ -190,6 +190,6 @@ Este proyecto es de uso académico y puede ser reutilizado con fines educativos 
 
 ## 📖 Autores 
 
-Abimael Santa: https://github.com/Cruzade-ab
-Génesis Ojeda: https://github.com/DevQueenPR
+- Abimael Santa: https://github.com/Cruzade-ab
+- Génesis Ojeda: https://github.com/DevQueenPR
 
